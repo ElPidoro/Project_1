@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Візуальний трекер звичок і балансу</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="app-header">
+    <div class="container header-inner">
+      <div class="brand">
+        <span class="brand-dot"></span>
+        <div>
+          <h1>Трекер звичок і балансу</h1>
+          <p id="current-date-label" class="subtitle"></p>
+        </div>
+      </div>
+
+      <nav class="main-nav" aria-label="Навігація розділами">
+        <button class="nav-btn active" data-tab="today">Сьогодні</button>
+        <button class="nav-btn" data-tab="heatmap">Теплова карта</button>
+        <button class="nav-btn" data-tab="balance">Колесо балансу</button>
+        <button class="nav-btn" data-tab="manage">Керування</button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- СТОРІНКА 1: СЬОГОДНІ -->
+    <section id="tab-today" class="tab-panel active">
+      <div class="today-top-grid">
+        <div class="card">
+          <div class="card-header">
+            <h2>Прогрес дня</h2>
+            <span id="today-percent-badge" class="badge">0%</span>
+          </div>
+          <div class="progress-track">
+            <div id="today-progress-bar" class="progress-fill" style="width: 0%"></div>
+          </div>
+          <p id="today-summary-text" class="muted-text">Виконано 0 із 0 активних звичок</p>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h2>Індекс балансу</h2>
+            <span id="balance-avg-badge" class="badge badge-accent">0.0 / 10</span>
+          </div>
+          <p id="weakest-sphere-hint" class="muted-text">Найбільше просідає: —</p>
+          <button class="link-btn" data-goto="balance">Перейти до колеса балансу →</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header wrap">
+          <h2>Чекліст звичок на сьогодні</h2>
+          <div id="category-filters" class="filter-pills">
+            <button class="pill active" data-cat="Усі">Усі</button>
+            <button class="pill" data-cat="Спорт">Спорт</button>
+            <button class="pill" data-cat="Навчання">Навчання</button>
+            <button class="pill" data-cat="Сон">Сон</button>
+            <button class="pill" data-cat="Відпочинок">Відпочинок</button>
+            <button class="pill" data-cat="Здоров'я">Здоров'я</button>
+          </div>
+        </div>
+
+        <form id="quick-add-form" class="inline-form">
+          <input type="text" id="habit-title-input" placeholder="Нова звичка (напр. 30 хв підтягувань або читання)..." required maxlength="60" />
+          <select id="habit-cat-select">
+            <option value="Спорт">Спорт</option>
+            <option value="Навчання">Навчання</option>
+            <option value="Сон">Сон</option>
+            <option value="Відпочинок">Відпочинок</option>
+            <option value="Здоров'я">Здоров'я</option>
+          </select>
+          <button type="submit" class="btn btn-primary">+ Додати</button>
+        </form>
+
+        <ul id="today-habit-list" class="habit-list"></ul>
+      </div>
+    </section>
+
+    <!-- СТОРІНКА 2: ТЕПЛОВА КАРТА -->
+    <section id="tab-heatmap" class="tab-panel">
+      <div class="stats-row">
+        <div class="card stat-card">
+          <span class="muted-text">Найкраща серія (стрік)</span>
+          <strong id="stat-best-streak" class="stat-value">0 дн.</strong>
+        </div>
+        <div class="card stat-card">
+          <span class="muted-text">Активних днів поспіль</span>
+          <strong id="stat-current-streak" class="stat-value">0 дн.</strong>
+        </div>
+        <div class="card stat-card">
+          <span class="muted-text">Середня активність</span>
+          <strong id="stat-avg-rate" class="stat-value">0%</strong>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header wrap">
+          <h2>Сітка активності</h2>
+          <div class="period-switch">
+            <button class="pill" data-days="30">30 днів</button>
+            <button class="pill active" data-days="90">90 днів</button>
+            <button class="pill" data-days="180">180 днів</button>
+          </div>
+        </div>
+
+        <div id="heatmap-grid" class="heatmap-grid" role="grid"></div>
+
+        <div class="heatmap-footer">
+          <span class="muted-text">Натисни на клітинку, щоб побачити деталі дня</span>
+          <div class="legend">
+            <span>Менше</span>
+            <span class="cell lv-0"></span>
+            <span class="cell lv-1"></span>
+            <span class="cell lv-2"></span>
+            <span class="cell lv-3"></span>
+            <span class="cell lv-4"></span>
+            <span>Більше</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" id="day-inspector-card">
+        <h3 id="inspector-date-title">Деталі обраного дня</h3>
+        <p id="inspector-date-body" class="muted-text">Обери будь-який квадратик на тепловій карті вище.</p>
+      </div>
+    </section>
+
+    <!-- СТОРІНКА 3: КОЛЕСО БАЛАНСУ -->
+    <section id="tab-balance" class="tab-panel">
+      <div class="balance-layout">
+        <div class="card canvas-card">
+          <div class="card-header wrap">
+            <h2>Колесо життєвого балансу</h2>
+            <button id="save-week-snapshot-btn" class="btn btn-secondary">Зафіксувати тиждень для порівняння</button>
+          </div>
+          <canvas id="balance-canvas" width="420" height="420"></canvas>
+          <div class="canvas-legend">
+            <span><i class="dot-solid"></i> Поточний тиждень</span>
+            <span><i class="dot-dashed"></i> Попередній зріз</span>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Оцінка сфер (1–10)</h2>
+          <p class="muted-text">Змінюй повзунки — колесо та рекомендація оновлюються миттєво.</p>
+          <div id="sliders-container" class="sliders-list"></div>
+
+          <div class="advice-box">
+            <p id="balance-advice-text">Порада: оціни сфери життя.</p>
+            <button id="add-weak-habit-btn" class="btn btn-primary">Додати звичку для просілої сфери</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- СТОРІНКА 4: КЕРУВАННЯ -->
+    <section id="tab-manage" class="tab-panel">
+      <div class="card">
+        <div class="card-header wrap">
+          <h2>Керування звичками</h2>
+          <span class="muted-text">Редагуй назви, цілі на тиждень або архівуй</span>
+        </div>
+        <div id="manage-habits-list" class="manage-list"></div>
+      </div>
+
+      <div class="card">
+        <h2>Календар та перевірка циклу</h2>
+        <p class="muted-text">Дані автоматично прив’язані до реальної дати у браузері (<code>nextlab_habit_balance_mvp_v1</code>). Можна протестувати перехід на наступний день або скинути демо-дані.</p>
+        <div class="btn-row">
+          <button id="simulate-next-day-btn" class="btn btn-secondary">Симулювати наступний день</button>
+          <button id="reset-demo-btn" class="btn btn-danger">Скинути до стартового набору</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
